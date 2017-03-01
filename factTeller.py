@@ -31,7 +31,7 @@ def reset_read_ids(db, cursor):
 	db.commit()
 
 def get_fact():
-	db = sqlite3.connect('./tgBotdbs/Factsdb')
+	db = sqlite3.connect('./Factsdb')
 	cursor = db.cursor()
 
 	factlist = get_unread_facts(db, cursor)
