@@ -1,6 +1,7 @@
 import sqlite3
 import random
 
+
 def get_unread_facts(db, cursor):
 	cursor.execute('''SELECT id, fact FROM facts WHERE used=0''')
 	allfacts = cursor.fetchall()
@@ -26,12 +27,14 @@ def update_read_fact(uid, db, cursor):
 	cursor.execute('''UPDATE facts SET used = ? WHERE id = ?''', (1, uid))
 	db.commit()
 
+
 def reset_read_ids(db, cursor):
 	cursor.execute('''UPDATE facts SET used=0''')
 	db.commit()
 
+
 def get_fact():
-	db = sqlite3.connect('./Factsdb')
+	db = sqlite3.connect('./Databases/Factsdb')
 	cursor = db.cursor()
 
 	factlist = get_unread_facts(db, cursor)
@@ -47,4 +50,4 @@ def get_fact():
 
 if __name__ == '__main__':
 	fact = get_fact()
-	print fact
+	print(fact)
