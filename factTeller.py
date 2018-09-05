@@ -2,52 +2,48 @@ import sqlite3
 import random
 
 
-def get_unread_facts(db, cursor):
-	cursor.execute('''SELECT id, fact FROM facts WHERE used=0''')
-	allfacts = cursor.fetchall()
+class FactTeller():
 
-	if allfacts == []:
-		reset_read_ids(db, cursor)
-		cursor.execute('''SELECT id, fact FROM facts WHERE used=0''')
-		allfacts = cursor.fetchall()
+	def __init__(self):
+		self.db = sqlite3.connect('./Databases/Factsdb')
+		self.cursor = self.db.cursor()
 
-	keys = []
-	facts = []
+		self.factlist = {}
 
-	for i in allfacts:
-		keys.append(i[0])
-		facts.append(i[1])
+	def get_unread_facts(self):
+		self.cursor.execute('''SELECT id, fact FROM facts WHERE used=0''')
+		all_unread_facts = self.cursor.fetchall()
 
-	factlist = [keys, facts]
+		if not all_unread_facts:
+			self.reset_read_ids()
+			self.cursor.execute('''SELECT id, fact FROM facts WHERE used=0''')
+			all_unread_facts = self.cursor.fetchall()
 
-	return factlist
+		self.factlist = [(i[0], i[1]) for i in all_unread_facts]
 
+	def update_read_fact(self, uid):
+		self.cursor.execute('''UPDATE facts SET used = ? WHERE id = ?''', (1, uid))
+		self.db.commit()
 
-def update_read_fact(uid, db, cursor):
-	cursor.execute('''UPDATE facts SET used = ? WHERE id = ?''', (1, uid))
-	db.commit()
+	def reset_read_ids(self):
+		self.cursor.execute('''UPDATE facts SET used=0''')
+		self.db.commit()
 
+	def get_fact(self, number_of_facts):
 
-def reset_read_ids(db, cursor):
-	cursor.execute('''UPDATE facts SET used=0''')
-	db.commit()
+		final_fact_list = []
 
+		for _ in range(number_of_facts):
+			self.get_unread_facts()
+			random_fact_tuple = random.choice(self.factlist)
+			self.update_read_fact(random_fact_tuple[0])
+			final_fact_list.append(random_fact_tuple[1])
 
-def get_fact():
-	db = sqlite3.connect('./Databases/Factsdb')
-	cursor = db.cursor()
-
-	factlist = get_unread_facts(db, cursor)
-	random_id = random.choice(factlist[0])
-	id_position = factlist[0].index(random_id)
-	fact = factlist[1][id_position]
-	update_read_fact(random_id, db, cursor)
-
-	db.close()
-
-	return fact
+		self.db.close()
+		return final_fact_list
 
 
 if __name__ == '__main__':
-	fact = get_fact()
-	print(fact)
+	f = FactTeller()
+	random_fact = f.get_fact(1)
+	[print(i) for i in random_fact]
