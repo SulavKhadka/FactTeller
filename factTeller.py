@@ -8,7 +8,7 @@ class FactTeller():
 		self.db = sqlite3.connect('./Databases/Factsdb')
 		self.cursor = self.db.cursor()
 
-		self.factlist = {}
+		self.factlist = []
 
 	def get_unread_facts(self):
 		self.cursor.execute('''SELECT id, fact FROM facts WHERE used=0''')
